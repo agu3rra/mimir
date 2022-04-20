@@ -42,7 +42,7 @@ pub fn get_args() -> Config {
                 .help("hostname or IP address to test against. E.g.: example.com, 10.18.23.11")
                 .required_unless_present("show_ciphers")
                 .value_name("HOST")
-                .allow_invalid_utf8(true)
+                .allow_invalid_utf8(false)
         )
         .arg(
             Arg::new("port")
@@ -51,23 +51,15 @@ pub fn get_args() -> Config {
                 .help("port number in which the service is served. E.g.: 443, 8443.")
                 .required_unless_present("show_ciphers")
                 .value_name("PORT")
-                .allow_invalid_utf8(true)
+                .allow_invalid_utf8(false)
         )
         .get_matches();
-
-    if matches.is_present("test") {
-        let host = matches.value_of_lossy("host").unwrap().to_string();
-        let port = matches.value_of_lossy("port").unwrap().to_string();
-    } else {
-        let host = None;
-        let port = None;
-    }
 
     Config {
         show_ciphers: matches.is_present("show_ciphers"),
         test: matches.is_present("test"),
-        host: host,
-        port: port,
+        host: matches.value_of("host").map(|n| n.to_owned()),
+        port: matches.value_of("port").map(|n| n.to_owned()),
     }
 }
 
