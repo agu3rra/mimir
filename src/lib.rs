@@ -1,6 +1,7 @@
-use std::io;
 use clap::{ Command, Arg };
 use tokio::net;
+use std::io;
+use std::net::SocketAddr;
 
 const MIMIR_VERSION: &str = "0.1.0";
 const MIMIR_AUTHOR: &str = "Andre Guerra";
@@ -64,10 +65,10 @@ pub fn get_args() -> Config {
 }
 
 #[tokio::main]
-pub async fn dns_lookup(target: &str) -> io::Result<()> {
+pub async fn dns_lookup(target: &str) -> Vec<SocketAddr> {
+    let mut addresses = Vec::new();
     for addr in net::lookup_host(target).await? {
-        println!("address is {}", addr);
-        println!("Debugging");
+        addresses.push(addr);
     }
-    Ok(())
+    addresses
 }

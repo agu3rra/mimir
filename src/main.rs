@@ -17,6 +17,8 @@ fn main() {
         std::process::exit(0)
     }
     if args.test {
-        println!("{:?}", args)
+        println!("### Welcome to Mimir ###");
+        println!("Resolving IP addresses for target: {}", args.host.unwrap());
+        println!("Found the following valid IP's:");
     }
 }
