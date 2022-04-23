@@ -1,11 +1,9 @@
-use clap::{ Command, Arg };
-use tokio::net;
-use std::io;
-use std::net::SocketAddr;
+use std::error::Error;
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, AddrParseError};
+use clap::{ self, Command, Arg, lazy_static::lazy_static };
 
-const MIMIR_VERSION: &str = "0.1.0";
 const MIMIR_AUTHOR: &str = "Andre Guerra";
-const MIMIR_ABOUT: &str = "Mimir - Security testing CLI";
+const MIMIR_ABOUT: &str = "Mimir - TLS Security testing CLI";
 
 #[derive(Debug)]
 pub struct Config {
@@ -17,7 +15,7 @@ pub struct Config {
 
 pub fn get_args() -> Config {
     let matches = Command::new("mimir")
-        .version(MIMIR_VERSION)
+        .version(clap::crate_version!())
         .author(MIMIR_AUTHOR)
         .about(MIMIR_ABOUT)
         .arg(
@@ -67,7 +65,11 @@ pub fn get_args() -> Config {
 /// Determines if provided `target` string is in IP address V4/V6
 /// 
 pub fn is_host_ip(target: &str) -> bool {
-    true
+    let ip_result: Result<IpAddr, AddrParseError> = target.parse();
+    let ip = match ip_result {
+        Ok(ip) => return true,
+        Err(ip) => return false,
+    };
 }
 
 #[test]
@@ -83,14 +85,12 @@ fn test_is_host_ip() {
         ("2000:1284:f019:6884:65d5:11d9:535d:5967", true),
         ("20:184:f019:6884:65d5:11d9:53d:5967", true),
         ("2g00:1284:f019:6884:65d5:11d9:535d:5967", false),
+        ("foobar", false),
+        ("example.com", false),
     ];
     for case in test_cases {
         let (input, expected_output) = case;
-        // let assertion = ;
-        // if assertion == false {
-        //     println!("Failed test: input={}; expected_output={}", input, expected_output);
-        // }
-        assert_eq!(is_host_ip(input), expected_output);
+        assert!(is_host_ip(input)==expected_output, "Test case failed: input={}; expected_output={}", input, expected_output);
     }
 }
 

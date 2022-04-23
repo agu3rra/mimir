@@ -18,8 +18,11 @@ fn main() {
     }
     if args.test {
         println!("### Welcome to Mimir ###");
-        // determine if host is a DNS entry or IP address (IPV4/6)
-        println!("Resolving IP addresses for target: {}", args.host.unwrap());
-        println!("Found the following valid IP's:");
+        let host = args.host.unwrap();
+        if mimir::is_host_ip(&host) {
+            println!("You provided an IP address in the host field.");
+        } else {
+            println!("You provided a DNS record. We'll try to determine its IP address in the next step.");
+        }
     }
 }
