@@ -18,6 +18,7 @@ fn main() {
     }
     if args.test {
         println!("### Welcome to Mimir ###");
+        // determine if host is a DNS entry or IP address (IPV4/6)
         println!("Resolving IP addresses for target: {}", args.host.unwrap());
         println!("Found the following valid IP's:");
     }

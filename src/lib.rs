@@ -64,11 +64,41 @@ pub fn get_args() -> Config {
     }
 }
 
-#[tokio::main]
-pub async fn dns_lookup(target: &str) -> Vec<SocketAddr> {
-    let mut addresses = Vec::new();
-    for addr in net::lookup_host(target).await? {
-        addresses.push(addr);
-    }
-    addresses
+/// Determines if provided `target` string is in IP address V4/V6
+/// 
+pub fn is_host_ip(target: &str) -> bool {
+    true
 }
+
+#[test]
+fn test_is_host_ip() {
+    let test_cases = vec![
+        // input, expected_response
+        ("192.6.30.1", true),
+        ("1.1.1.1", true),
+        ("256.1.1.1", false),
+        ("localhost", false),
+        ("192.6.3", false),
+        ("1234", false),
+        ("2000:1284:f019:6884:65d5:11d9:535d:5967", true),
+        ("20:184:f019:6884:65d5:11d9:53d:5967", true),
+        ("2g00:1284:f019:6884:65d5:11d9:535d:5967", false),
+    ];
+    for case in test_cases {
+        let (input, expected_output) = case;
+        // let assertion = ;
+        // if assertion == false {
+        //     println!("Failed test: input={}; expected_output={}", input, expected_output);
+        // }
+        assert_eq!(is_host_ip(input), expected_output);
+    }
+}
+
+// #[tokio::main]
+// pub async fn dns_lookup(target: &str) -> Vec<SocketAddr> {
+//     let mut addresses = Vec::new();
+//     for addr in net::lookup_host(target).await? {
+//         addresses.push(addr);
+//     }
+//     addresses
+// }
