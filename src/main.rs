@@ -3,11 +3,12 @@ use clap;
 
 fn main() {
     println!("### Welcome to {} ###", clap::crate_name!());
+    let test_suite = protocol::TestSuite::new();
     let args = mimir::get_args();
     if args.show_ciphers {
         println!("Summary:");
-        let versions = protocol::tls_versions();
-        println!("TLS protocol versions implemented for testing: {}\n--", versions.len());
+        let versions = test_suite.versions;
+        println!("TLS protocol versions implemented for testing: {}\n--",versions.len());
         for version in versions {
             println!("Protocol: {:?}", version.protocol);
             println!("Ciphers count: {}\n-", version.ciphers.len());
@@ -23,6 +24,10 @@ fn main() {
         Ok(addresses) => {
             for address in addresses {
                 println!("Attempting tests on: {:?}", address);
+                // synchronous first then queue a bunch and send them simultaneously
+                
+                // establish connection to socket
+                // build byte sequence for client hello
                 // std::process::exit(0)
             }
         }
