@@ -1,6 +1,8 @@
 mod protocol;
+use clap;
 
 fn main() {
+    println!("### Welcome to {} ###", clap::crate_name!());
     let args = mimir::get_args();
     if args.show_ciphers {
         println!("Summary:");
@@ -16,13 +18,17 @@ fn main() {
         }
         std::process::exit(0)
     }
-    if args.test {
-        println!("### Welcome to Mimir ###");
-        let host = args.host.unwrap();
-        if mimir::is_host_ip(&host) {
-            println!("You provided an IP address in the host field.");
-        } else {
-            println!("You provided a DNS record. We'll try to determine its IP address in the next step.");
+    let target = args.test.unwrap();
+    let _ = match mimir::dns_lookup(&target){
+        Ok(addresses) => {
+            for address in addresses {
+                println!("Attempting tests on: {:?}", address);
+                // std::process::exit(0)
+            }
         }
-    }
+        Err(error) => { 
+            eprintln!("Error on address resolution: {}", error);
+            std::process::exit(1)
+        }
+    };
 }
