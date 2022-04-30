@@ -3,6 +3,8 @@ use clap::{ self, Command, Arg };
 use tokio::{self, net};
 use std::io::{self, ErrorKind};
 
+mod protocol;
+
 #[derive(Debug)]
 pub struct Config {
     pub show_ciphers: bool,
@@ -28,7 +30,7 @@ pub fn get_args() -> Config {
                 .long("test")
                 .help("tests supported cipher suites in target. e.g.: -t foo.com:443")
                 .takes_value(true)
-                .value_name("TARGET")
+                .value_name("TARGET") 
                 .allow_invalid_utf8(false)
                 .required_unless_present("show_ciphers")
         )
@@ -37,6 +39,21 @@ pub fn get_args() -> Config {
     Config {
         show_ciphers: matches.is_present("show_ciphers"),
         test: matches.value_of("test").map(|n| n.to_owned()),
+    }
+}
+
+pub fn show_ciphers() {
+    let test_suite = protocol::TestSuite::new();
+    println!("Summary:");
+    let versions = test_suite.versions;
+    println!("TLS protocol versions implemented for testing: {}\n--",versions.len());
+    for version in versions {
+        println!("Protocol: {:?}", version.protocol);
+        println!("Ciphers count: {}\n-", version.ciphers.len());
+        for cipher in version.ciphers {
+            println!("{:?}", cipher)
+        }
+        println!("---");
     }
 }
 
@@ -55,4 +72,10 @@ pub async fn dns_lookup(target: &str) -> io::Result<Vec<SocketAddr>>{
         ErrorKind::AddrNotAvailable, 
         "Target provided cannot be reached")
     )
+}
+
+pub fn check_supported_ciphers(socket: SocketAddr) -> bool {
+    println!("Attempting tests on: {:?}", socket);
+
+    true
 }
