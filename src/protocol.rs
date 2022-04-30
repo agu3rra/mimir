@@ -1,19 +1,19 @@
 #[derive(Debug, Clone)]
-struct Protocol {
-    name: &'static str,
+pub struct Protocol {
+    pub name: &'static str,
     hex_value: Vec<u8>,
 }
 
 #[derive(Debug, Clone)]
-struct Cipher {
-    name: &'static str,
+pub struct Cipher {
+    pub name: &'static str,
     hex_value: Vec<u8>,
     relevant_bytes: u8,  // because SSLv2.0 uses 3 byte representations we will need to fit into an u16
 }
 
 #[derive(Debug, Clone)]
-struct Extension {
-    name: &'static str,
+pub struct Extension {
+    pub name: &'static str,
     hex_value: Vec<u8>,
 }
 
