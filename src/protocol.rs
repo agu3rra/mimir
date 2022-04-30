@@ -49,8 +49,16 @@ impl Version {
         rng.fill(&mut challenge[..]);  // random 16 bytes - no need for truly random as this is for checking cipher support
         println!("Challenge: {:?}", challenge);
         let session_length: Vec<u8> = (0x0000 as u16).to_be_bytes().to_vec();
-        let mut message: Vec<u8> = self.protocol.hex_value.clone();
-        [message, challenge.to_vec(), session_length].concat()
+        let relevant_cipher_index_start: usize = cipher.hex_value.len() - cipher.relevant_bytes as usize;
+        let cipher_hex: Vec<u8> = cipher.hex_value[relevant_cipher_index_start..].to_vec();
+        [
+            HANDSHAKE_CLIENT_HELLO.to_be_bytes().to_vec(),
+            self.protocol.hex_value.clone(),
+            (cipher.relevant_bytes as u16).to_be_bytes().to_vec(),
+            session_length,
+            cipher_hex,
+            challenge.to_vec(),
+        ].concat()
     }
 }
 
