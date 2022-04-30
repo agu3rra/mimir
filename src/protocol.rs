@@ -1,3 +1,248 @@
+#[derive(Debug)]
+struct Protocol {
+    name: &'static str,
+    hex_value: Vec<u8>,
+}
+
+#[derive(Debug)]
+struct Cipher {
+    name: &'static str,
+    hex_value: Vec<u8>,
+    relevant_bytes: u8,  // because SSLv2.0 uses 3 byte representations we will need to fit into an u16
+}
+
+#[derive(Debug)]
+pub struct Version {
+    pub protocol: Protocol,
+    pub ciphers: Vec<Cipher>,
+    pub ext_support_groups: Option<Vec<u16>>,
+    pub ext_ec_point_formats: Option<Vec<u8>>,
+}
+
+impl Version {
+    fn new(
+        protocol: Protocol,
+        ciphers: Vec<Cipher>,
+        ext_support_groups: Option<Vec<u16>>,
+        ext_ec_point_formats: Option<Vec<u8>>,
+    ) -> Version {
+        Version { 
+            protocol: protocol,
+            ciphers: ciphers,  
+            ext_support_groups: ext_support_groups,
+            ext_ec_point_formats: ext_ec_point_formats,
+        }
+    }
+
+    pub fn client_hello() {
+        
+    }
+
+    pub fn server_hello_response() {
+
+    }
+}
+
+pub struct TestSuite {
+    pub versions: Vec<Version>
+}
+impl TestSuite {
+    pub fn new() -> TestSuite {
+        let ssl20 = Version::new(
+            Protocol { 
+                name: "SSLv2.0",
+                hex_value: SSLV20.to_be_bytes().to_vec()
+            }, 
+            vec![
+                Cipher { name: "SSL2_RC4_128_WITH_MD5", hex_value: SSL2_RC4_128_WITH_MD5.to_be_bytes().to_vec(), relevant_bytes: 3},
+                Cipher { name: "SSL2_RC4_128_EXPORT40_WITH_MD5", hex_value: SSL2_RC4_128_EXPORT40_WITH_MD5.to_be_bytes().to_vec(), relevant_bytes: 3},
+                Cipher { name: "SSL2_RC2_128_CBC_WITH_MD5", hex_value: SSL2_RC2_128_CBC_WITH_MD5.to_be_bytes().to_vec(), relevant_bytes: 3},
+                Cipher { name: "SSL2_RC2_128_CBC_EXPORT40_WITH_MD5", hex_value: SSL2_RC2_128_CBC_EXPORT40_WITH_MD5.to_be_bytes().to_vec(), relevant_bytes: 3},
+                Cipher { name: "SSL2_IDEA_128_CBC_WITH_MD5", hex_value: SSL2_IDEA_128_CBC_WITH_MD5.to_be_bytes().to_vec(), relevant_bytes: 3},
+                Cipher { name: "SSL2_DES_64_CBC_WITH_MD5", hex_value: SSL2_DES_64_CBC_WITH_MD5.to_be_bytes().to_vec(), relevant_bytes: 3},
+                Cipher { name: "SSL2_DES_192_EDE3_CBC_WITH_MD5", hex_value: SSL2_DES_192_EDE3_CBC_WITH_MD5.to_be_bytes().to_vec(), relevant_bytes: 3},
+            ],
+            None,
+            None
+        );
+        let ciphers_ssl30_tls10_tls11 = vec![
+            TLS_RSA_WITH_NULL_MD5,
+            TLS_RSA_WITH_NULL_SHA,
+            TLS_RSA_EXPORT_WITH_RC4_40_MD5,
+            TLS_RSA_WITH_RC4_128_MD5,
+            TLS_RSA_WITH_RC4_128_SHA,
+            TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5,
+            TLS_RSA_WITH_IDEA_CBC_SHA,
+            TLS_RSA_EXPORT_WITH_DES40_CBC_SHA,
+            TLS_RSA_WITH_DES_CBC_SHA,
+            TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+            TLS_DH_DSS_WITH_DES_CBC_SHA,
+            TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
+            TLS_DH_RSA_WITH_DES_CBC_SHA,
+            TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
+            TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA,
+            TLS_DHE_DSS_WITH_DES_CBC_SHA,
+            TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
+            TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA,
+            TLS_DHE_RSA_WITH_DES_CBC_SHA,
+            TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
+            TLS_DH_ANON_EXPORT_WITH_RC4_40_MD5,
+            TLS_DH_ANON_WITH_RC4_128_MD5,
+            TLS_DH_ANON_EXPORT_WITH_DES40_CBC_SHA,
+            TLS_DH_ANON_WITH_DES_CBC_SHA,
+            TLS_DH_ANON_WITH_3DES_EDE_CBC_SHA,
+            TLS_RSA_WITH_AES_128_CBC_SHA,
+            TLS_DH_DSS_WITH_AES_128_CBC_SHA,
+            TLS_DH_RSA_WITH_AES_128_CBC_SHA,
+            TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
+            TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+            TLS_DH_ANON_WITH_AES_128_CBC_SHA,
+            TLS_RSA_WITH_AES_256_CBC_SHA,
+            TLS_DH_DSS_WITH_AES_256_CBC_SHA,
+            TLS_DH_RSA_WITH_AES_256_CBC_SHA,
+            TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
+            TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+            TLS_DH_ANON_WITH_AES_256_CBC_SHA,
+            TLS_RSA_WITH_CAMELLIA_128_CBC_SHA,
+            TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA,
+            TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA,
+            TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA,
+            TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA,
+            TLS_DH_ANON_WITH_CAMELLIA_128_CBC_SHA,
+            TLS_RSA_WITH_CAMELLIA_256_CBC_SHA,
+            TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA,
+            TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA,
+            TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA,
+            TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA,
+            TLS_DH_ANON_WITH_CAMELLIA_256_CBC_SHA,
+            TLS_RSA_WITH_SEED_CBC_SHA,
+            TLS_DH_DSS_WITH_SEED_CBC_SHA,
+            TLS_DH_RSA_WITH_SEED_CBC_SHA,
+            TLS_DHE_DSS_WITH_SEED_CBC_SHA,
+            TLS_DHE_RSA_WITH_SEED_CBC_SHA,
+            TLS_DH_ANON_WITH_SEED_CBC_SHA,
+            TLS_ECDH_ECDSA_WITH_NULL_SHA,
+            TLS_ECDH_ECDSA_WITH_RC4_128_SHA,
+            TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,
+            TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
+            TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
+            TLS_ECDHE_ECDSA_WITH_NULL_SHA,
+            TLS_ECDHE_ECDSA_WITH_RC4_128_SHA,
+            TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,
+            TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+            TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+            TLS_ECDH_RSA_WITH_NULL_SHA,
+            TLS_ECDH_RSA_WITH_RC4_128_SHA,
+            TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,
+            TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
+            TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
+            TLS_ECDHE_RSA_WITH_NULL_SHA,
+            TLS_ECDHE_RSA_WITH_RC4_128_SHA,
+            TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,
+            TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+            TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+            TLS_ECDH_ANON_WITH_NULL_SHA,
+            TLS_ECDH_ANON_WITH_RC4_128_SHA,
+            TLS_ECDH_ANON_WITH_3DES_EDE_CBC_SHA,
+            TLS_ECDH_ANON_WITH_AES_128_CBC_SHA,
+            TLS_ECDH_ANON_WITH_AES_256_CBC_SHA,
+        ];
+        let ssl30 = Version::new(
+            SSLV30,
+            ciphers_ssl30_tls10_tls11.clone(),
+            None,
+            None
+        );
+        let esg = vec![
+            GROUP_SECP256R1,
+            GROUP_SECP384R1,
+            GROUP_SECP521R1,
+            GROUP_X25519,
+            GROUP_X448,
+        ];
+        let epf = vec![
+            EC_POINT_FORMAT_UNCOMPRESSED,
+            EC_POINT_FORMAT_ANSIX962_COMPRESSED_PRIME,
+            EC_POINT_FORMAT_ANSIX962_COMPRESSED_CHAR2,
+        ];
+
+        let tls10 = Version::new(
+            TLSV10,
+            ciphers_ssl30_tls10_tls11.clone(),
+            Some(esg.clone()),
+            Some(epf.clone()),
+        );
+    
+        let tls11 = Version::new(
+            TLSV11,
+            ciphers_ssl30_tls10_tls11.clone(),
+            Some(esg.clone()),
+            Some(epf.clone()),
+        );
+    
+        let mut ciphers_tls12 = vec![
+            TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+            TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+            TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,
+            TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,
+            TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+            TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+            TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
+            TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
+            TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+            TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+            TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
+            TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
+            TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+            TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+            TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
+            TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
+            TLS_RSA_WITH_ARIA_128_GCM_SHA256,
+            TLS_RSA_WITH_ARIA_256_GCM_SHA384,
+            TLS_DHE_RSA_WITH_ARIA_128_GCM_SHA256,
+            TLS_DHE_RSA_WITH_ARIA_256_GCM_SHA384,
+            TLS_DHE_DSS_WITH_ARIA_128_GCM_SHA256,
+            TLS_DHE_DSS_WITH_ARIA_256_GCM_SHA384,
+            TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256,
+            TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384,
+            TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256,
+            TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384,
+            TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256,
+            TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384,
+            TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256,
+            TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384,
+            TLS_RSA_WITH_AES_128_CCM,
+            TLS_RSA_WITH_AES_256_CCM,
+            TLS_DHE_RSA_WITH_AES_128_CCM,
+            TLS_DHE_RSA_WITH_AES_256_CCM,
+            TLS_RSA_WITH_AES_128_CCM_8,
+            TLS_RSA_WITH_AES_256_CCM_8,
+            TLS_DHE_RSA_WITH_AES_128_CCM_8,
+            TLS_DHE_RSA_WITH_AES_256_CCM_8,
+            TLS_ECDHE_ECDSA_WITH_AES_128_CCM,
+            TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
+            TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8,
+            TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8,
+            TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+            TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+            TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+        ];
+        ciphers_tls12.extend(ciphers_ssl30_tls10_tls11);
+        
+        let tls12 = Version::new(
+            TLSV12,
+            ciphers_tls12,
+            Some(esg.clone()),
+            Some(epf.clone()),
+        );
+    
+        TestSuite {
+            versions: vec![ssl20, ssl30, tls10, tls11, tls12],
+        }
+    }
+}
+
+
 // TLS Protocol bytes as defined in RFC-8446
 // https://datatracker.ietf.org/doc/html/rfc8446
 const CONTENT_HANDSHAKE: u8 = 0x16;
@@ -193,231 +438,3 @@ const GROUP_X448: u16 = 0x001e;
 const EC_POINT_FORMAT_UNCOMPRESSED: u8 = 0x00;
 const EC_POINT_FORMAT_ANSIX962_COMPRESSED_PRIME: u8 = 0x01;
 const EC_POINT_FORMAT_ANSIX962_COMPRESSED_CHAR2: u8 = 0x02;
-
-#[derive(Debug)]
-pub struct Version {
-    pub protocol: u16,
-    pub ciphers: Vec<u32>,
-    pub ext_support_groups: Option<Vec<u16>>,
-    pub ext_ec_point_formats: Option<Vec<u8>>,
-}
-
-impl Version {
-    fn new(
-        protocol: u16,
-        ciphers: Vec<u32>,
-        ext_support_groups: Option<Vec<u16>>,
-        ext_ec_point_formats: Option<Vec<u8>>,
-    ) -> Version {
-        Version { 
-            protocol: protocol,
-            ciphers: ciphers,  
-            ext_support_groups: ext_support_groups,
-            ext_ec_point_formats: ext_ec_point_formats,
-        }
-    }
-
-    pub fn client_hello() {
-        
-    }
-
-    pub fn server_hello_response() {
-
-    }
-}
-
-pub struct TestSuite {
-    pub versions: Vec<Version>
-}
-impl TestSuite {
-    pub fn new() -> TestSuite {
-        let ssl20 = Version::new(
-            SSLV20, 
-            vec![
-                SSL2_RC4_128_WITH_MD5,
-                SSL2_RC4_128_EXPORT40_WITH_MD5,
-                SSL2_RC2_128_CBC_WITH_MD5,
-                SSL2_RC2_128_CBC_EXPORT40_WITH_MD5,
-                SSL2_IDEA_128_CBC_WITH_MD5,
-                SSL2_DES_64_CBC_WITH_MD5,
-                SSL2_DES_192_EDE3_CBC_WITH_MD5,
-            ],
-            None,
-            None
-        );
-        let ciphers_ssl30_tls10_tls11 = vec![
-            TLS_RSA_WITH_NULL_MD5,
-            TLS_RSA_WITH_NULL_SHA,
-            TLS_RSA_EXPORT_WITH_RC4_40_MD5,
-            TLS_RSA_WITH_RC4_128_MD5,
-            TLS_RSA_WITH_RC4_128_SHA,
-            TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5,
-            TLS_RSA_WITH_IDEA_CBC_SHA,
-            TLS_RSA_EXPORT_WITH_DES40_CBC_SHA,
-            TLS_RSA_WITH_DES_CBC_SHA,
-            TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-            TLS_DH_DSS_WITH_DES_CBC_SHA,
-            TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
-            TLS_DH_RSA_WITH_DES_CBC_SHA,
-            TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
-            TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA,
-            TLS_DHE_DSS_WITH_DES_CBC_SHA,
-            TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
-            TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA,
-            TLS_DHE_RSA_WITH_DES_CBC_SHA,
-            TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
-            TLS_DH_ANON_EXPORT_WITH_RC4_40_MD5,
-            TLS_DH_ANON_WITH_RC4_128_MD5,
-            TLS_DH_ANON_EXPORT_WITH_DES40_CBC_SHA,
-            TLS_DH_ANON_WITH_DES_CBC_SHA,
-            TLS_DH_ANON_WITH_3DES_EDE_CBC_SHA,
-            TLS_RSA_WITH_AES_128_CBC_SHA,
-            TLS_DH_DSS_WITH_AES_128_CBC_SHA,
-            TLS_DH_RSA_WITH_AES_128_CBC_SHA,
-            TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-            TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-            TLS_DH_ANON_WITH_AES_128_CBC_SHA,
-            TLS_RSA_WITH_AES_256_CBC_SHA,
-            TLS_DH_DSS_WITH_AES_256_CBC_SHA,
-            TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-            TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
-            TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-            TLS_DH_ANON_WITH_AES_256_CBC_SHA,
-            TLS_RSA_WITH_CAMELLIA_128_CBC_SHA,
-            TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA,
-            TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA,
-            TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA,
-            TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA,
-            TLS_DH_ANON_WITH_CAMELLIA_128_CBC_SHA,
-            TLS_RSA_WITH_CAMELLIA_256_CBC_SHA,
-            TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA,
-            TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA,
-            TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA,
-            TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA,
-            TLS_DH_ANON_WITH_CAMELLIA_256_CBC_SHA,
-            TLS_RSA_WITH_SEED_CBC_SHA,
-            TLS_DH_DSS_WITH_SEED_CBC_SHA,
-            TLS_DH_RSA_WITH_SEED_CBC_SHA,
-            TLS_DHE_DSS_WITH_SEED_CBC_SHA,
-            TLS_DHE_RSA_WITH_SEED_CBC_SHA,
-            TLS_DH_ANON_WITH_SEED_CBC_SHA,
-            TLS_ECDH_ECDSA_WITH_NULL_SHA,
-            TLS_ECDH_ECDSA_WITH_RC4_128_SHA,
-            TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,
-            TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
-            TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
-            TLS_ECDHE_ECDSA_WITH_NULL_SHA,
-            TLS_ECDHE_ECDSA_WITH_RC4_128_SHA,
-            TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,
-            TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-            TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
-            TLS_ECDH_RSA_WITH_NULL_SHA,
-            TLS_ECDH_RSA_WITH_RC4_128_SHA,
-            TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,
-            TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
-            TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
-            TLS_ECDHE_RSA_WITH_NULL_SHA,
-            TLS_ECDHE_RSA_WITH_RC4_128_SHA,
-            TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,
-            TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-            TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-            TLS_ECDH_ANON_WITH_NULL_SHA,
-            TLS_ECDH_ANON_WITH_RC4_128_SHA,
-            TLS_ECDH_ANON_WITH_3DES_EDE_CBC_SHA,
-            TLS_ECDH_ANON_WITH_AES_128_CBC_SHA,
-            TLS_ECDH_ANON_WITH_AES_256_CBC_SHA,
-        ];
-        let ssl30 = Version::new(
-            SSLV30,
-            ciphers_ssl30_tls10_tls11.clone(),
-            None,
-            None
-        );
-        let esg = vec![
-            GROUP_SECP256R1,
-            GROUP_SECP384R1,
-            GROUP_SECP521R1,
-            GROUP_X25519,
-            GROUP_X448,
-        ];
-        let epf = vec![
-            EC_POINT_FORMAT_UNCOMPRESSED,
-            EC_POINT_FORMAT_ANSIX962_COMPRESSED_PRIME,
-            EC_POINT_FORMAT_ANSIX962_COMPRESSED_CHAR2,
-        ];
-
-        let tls10 = Version::new(
-            TLSV10,
-            ciphers_ssl30_tls10_tls11.clone(),
-            Some(esg.clone()),
-            Some(epf.clone()),
-        );
-    
-        let tls11 = Version::new(
-            TLSV11,
-            ciphers_ssl30_tls10_tls11.clone(),
-            Some(esg.clone()),
-            Some(epf.clone()),
-        );
-    
-        let mut ciphers_tls12 = vec![
-            TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-            TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
-            TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,
-            TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,
-            TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-            TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-            TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
-            TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
-            TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-            TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-            TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
-            TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
-            TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-            TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-            TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
-            TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
-            TLS_RSA_WITH_ARIA_128_GCM_SHA256,
-            TLS_RSA_WITH_ARIA_256_GCM_SHA384,
-            TLS_DHE_RSA_WITH_ARIA_128_GCM_SHA256,
-            TLS_DHE_RSA_WITH_ARIA_256_GCM_SHA384,
-            TLS_DHE_DSS_WITH_ARIA_128_GCM_SHA256,
-            TLS_DHE_DSS_WITH_ARIA_256_GCM_SHA384,
-            TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256,
-            TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384,
-            TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256,
-            TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384,
-            TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256,
-            TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384,
-            TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256,
-            TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384,
-            TLS_RSA_WITH_AES_128_CCM,
-            TLS_RSA_WITH_AES_256_CCM,
-            TLS_DHE_RSA_WITH_AES_128_CCM,
-            TLS_DHE_RSA_WITH_AES_256_CCM,
-            TLS_RSA_WITH_AES_128_CCM_8,
-            TLS_RSA_WITH_AES_256_CCM_8,
-            TLS_DHE_RSA_WITH_AES_128_CCM_8,
-            TLS_DHE_RSA_WITH_AES_256_CCM_8,
-            TLS_ECDHE_ECDSA_WITH_AES_128_CCM,
-            TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
-            TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8,
-            TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8,
-            TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
-            TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
-            TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
-        ];
-        ciphers_tls12.extend(ciphers_ssl30_tls10_tls11);
-        
-        let tls12 = Version::new(
-            TLSV12,
-            ciphers_tls12,
-            Some(esg.clone()),
-            Some(epf.clone()),
-        );
-    
-        TestSuite {
-            versions: vec![ssl20, ssl30, tls10, tls11, tls12],
-        }
-    }
-}
