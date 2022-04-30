@@ -1,5 +1,4 @@
 mod protocol;
-mod tls;
 use clap;
 
 fn main() {
