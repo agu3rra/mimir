@@ -1,7 +1,10 @@
 use std::net::{SocketAddr};
 use clap::{ self, Command, Arg };
-use tokio::{self, net};
-use std::io::{self, ErrorKind};
+use tokio::{self, net, io::AsyncWriteExt};
+use std::{
+    io::{self, ErrorKind},
+    error::Error,
+};
 
 mod protocol;
 
@@ -74,8 +77,9 @@ pub async fn dns_lookup(target: &str) -> io::Result<Vec<SocketAddr>>{
     )
 }
 
-pub fn check_supported_ciphers(socket: SocketAddr) -> bool {
-    println!("Attempting tests on: {:?}", socket);
-
-    true
+pub async fn check_supported_ciphers(addr: SocketAddr) -> Result<(), Box<dyn Error>> {
+    println!("Attempting tests on: {:?}", addr);
+    let mut stream = net::TcpStream::connect(addr).await?;
+    stream.write_all(b"foo").await?;
+    Ok(())
 }

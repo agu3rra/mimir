@@ -1,3 +1,5 @@
+use rand::{Rng, RngCore};
+
 #[derive(Debug, Clone)]
 pub struct Protocol {
     pub name: &'static str,
@@ -40,13 +42,29 @@ impl Version {
         }
     }
 
-    pub fn client_hello() {
-        
+    // generates client hello byte stream for the given input
+    fn client_hello(&self, cipher: Cipher) -> Vec<u8> {
+        let mut rng = rand::thread_rng();
+        let mut challenge = [0u8; 16];
+        rng.fill(&mut challenge[..]);  // random 16 bytes - no need for truly random as this is for checking cipher support
+        println!("Challenge: {:?}", challenge);
+        let session_length: Vec<u8> = (0x0000 as u16).to_be_bytes().to_vec();
+        let mut message: Vec<u8> = self.protocol.hex_value.clone();
+        [message, challenge.to_vec(), session_length].concat()
     }
+}
 
-    pub fn server_hello_response() {
-
-    }
+#[test]
+fn test_client_hello() {
+    let test_version = Version::new(
+        Protocol { name: "FooBar", hex_value: (0x0102 as u16).to_be_bytes().to_vec() },
+        vec![Cipher { name: "dummy", hex_value: (0x14e2f0 as u32).to_be_bytes().to_vec(), relevant_bytes: 3 }],
+        None,
+        None,
+    );
+    let hello = test_version.client_hello(Cipher { name: "dummy", hex_value: (0x14e2f0 as u32).to_be_bytes().to_vec(), relevant_bytes: 3 });
+    println!("{:?}", hello);
+    assert!(true)
 }
 
 pub struct TestSuite {

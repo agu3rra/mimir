@@ -12,9 +12,10 @@ fn main() {
     let _ = match mimir::dns_lookup(&target){
         Ok(addresses) => {
             for address in addresses {
-                if mimir::check_supported_ciphers(address) {
-                   std::process::exit(0)
-                }
+                println!("foo");
+                // match mimir::check_supported_ciphers(address) {
+                //    std::process::exit(0)
+                // }
             }
         }
         Err(error) => { 
