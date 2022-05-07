@@ -43,7 +43,7 @@ impl Version {
     }
 
     // generates client hello byte stream for the given input cipher---
-    fn client_hello(&self, cipher: Cipher) -> Vec<u8> {
+    fn client_hello(&self, cipher: Cipher, host: String) -> Vec<u8> {
         let hello_message: Vec<u8>;
 
         if self.protocol.hex_value == SSLV20.to_be_bytes().to_vec() {  // SSL2.0 is a special case
@@ -76,14 +76,58 @@ impl Version {
             hello_message = message;
 
         } else {  // all other hellos
-            let message = [
+            // challenge is 32 bytes at random. Using Unix epoch is deemed insecure
+            let mut rng = rand::thread_rng();
+            let mut challenge = [0u8; 32];
+            rng.fill(&mut challenge[..]); 
+
+            // Extension Supported Versions
+            let sup_version = self.protocol.hex_value.clone();
+            let sup_version_length = (sup_version.len() as u8).to_be_bytes().to_vec();
+            let ext_length = ([
+                sup_version_length,
+                sup_version,
+            ].concat().len() as u16).to_be_bytes().to_vec();
+            let ext_type = (0x002b as u16).to_be_bytes().to_vec();
+            let ext_sup_versions = [
+                ext_type,
+                ext_length,
+                sup_version_length,
+                sup_version,
+            ].concat();
+            // STOPPED HERE
+
+            
+            // message assembled backwards as there's size calculations in multiple locations
+            let mut message = [
+
+                // Extension Supported Versions
+                
+                
+                
+                
+                // HANDSHAKE_CLIENT_HELLO.to_be_bytes().to_vec(),
+                // // handshake_size in 3 bytes
+                // self.protocol.hex_value.clone(),  // it does repeat in multiple places; this one is handshake version
+                // challenge,
+                // (0x00 as u8).to_be_bytes().to_vec(),  // session_length; we don't use it
+                // ciphers size
+                // ciphers
+                // compression_length
+                // compression method
+                // extensions size
+                // ext_server_name
+                // ext_ec_point_formats
+                // ext_supported_groups
+                // ext_supported_versions
+
+            ].concat();
+            let message_size = (message.len() as u8).to_be_bytes().to_vec();
+            message = [
                 CONTENT_HANDSHAKE.to_be_bytes().to_vec(),
-                HANDSHAKE_CLIENT_HELLO.to_be_bytes().to_vec(),
                 self.protocol.hex_value.clone(),
-                // (cipher.relevant_bytes as u16).to_be_bytes().to_vec(),
-                // session_length,
-                // cipher_hex,
-                // challenge.to_vec(),
+                message_size,
+                message,
             ].concat();
             hello_message = message;
         }        

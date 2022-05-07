@@ -1,4 +1,4 @@
-# Mimir: TLS Cipher Suite CLI Tester
+# Mimir: TLS Cipher Suite CLI Tester (work in-progress...)
 Mimir is a figure in Norse mythology, renowned for his knowledge and wisdom, who is beheaded during the Æsir-Vanir War. Afterward, the god Odin carries around Mímir's head and it recites secret knowledge and counsel to him.
 
 The objective of this CLI application is to tell you supported cipher-suites of any given HTTPS connection. It shall aid you in determining deprecated and unwanted ones that are know to be insecure.
