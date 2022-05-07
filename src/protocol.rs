@@ -10,7 +10,7 @@ pub struct Protocol {
 pub struct Cipher {
     pub name: &'static str,
     hex_value: Vec<u8>,
-    relevant_bytes: u8,  // because SSLv2.0 uses 3 byte representations we will need to fit into an u16
+    relevant_bytes: u8,  // because SSLv2.0 uses 3 byte representations we will need to fit into an u32 (4 bytes), but only care about the last 3 of them when assembling client hello
 }
 
 #[derive(Debug, Clone)]
@@ -33,8 +33,8 @@ impl Version {
         ciphers: Vec<Cipher>,
         ext_support_groups: Option<Vec<Extension>>,
         ext_ec_point_formats: Option<Vec<Extension>>,
-    ) -> Version {
-        Version { 
+    ) -> Self {
+        Self { 
             protocol: protocol,
             ciphers: ciphers,  
             ext_support_groups: ext_support_groups,
@@ -42,44 +42,74 @@ impl Version {
         }
     }
 
-    // generates client hello byte stream for the given input
+    // generates client hello byte stream for the given input cipher---
     fn client_hello(&self, cipher: Cipher) -> Vec<u8> {
-        let mut rng = rand::thread_rng();
-        let mut challenge = [0u8; 16];
-        rng.fill(&mut challenge[..]);  // random 16 bytes - no need for truly random as this is for checking cipher support
-        println!("Challenge: {:?}", challenge);
-        let session_length: Vec<u8> = (0x0000 as u16).to_be_bytes().to_vec();
-        let relevant_cipher_index_start: usize = cipher.hex_value.len() - cipher.relevant_bytes as usize;
-        let cipher_hex: Vec<u8> = cipher.hex_value[relevant_cipher_index_start..].to_vec();
-        [
-            HANDSHAKE_CLIENT_HELLO.to_be_bytes().to_vec(),
-            self.protocol.hex_value.clone(),
-            (cipher.relevant_bytes as u16).to_be_bytes().to_vec(),
-            session_length,
-            cipher_hex,
-            challenge.to_vec(),
-        ].concat()
+        let hello_message: Vec<u8>;
+
+        if self.protocol.hex_value == SSLV20.to_be_bytes().to_vec() {  // SSL2.0 is a special case
+            
+            let mut rng = rand::thread_rng();
+            let mut challenge = [0u8; 16];
+            rng.fill(&mut challenge[..]);  // random 16 bytes - no need for truly random as this is for checking cipher support
+            let challenge_size = (16 as u16).to_be_bytes().to_vec();  // 16 bytes represented by 2 bytes
+            let session_length: Vec<u8> = (0x0000 as u16).to_be_bytes().to_vec();
+            let relevant_cipher_index_start: usize = cipher.hex_value.len() - cipher.relevant_bytes as usize;
+            let cipher_hex: Vec<u8> = cipher.hex_value[relevant_cipher_index_start..].to_vec();  // uses only required bytes
+            let ciphers_length = (cipher.relevant_bytes as u16).to_be_bytes().to_vec();
+
+            let mut message = [
+                HANDSHAKE_CLIENT_HELLO.to_be_bytes().to_vec(),
+                self.protocol.hex_value.clone(),
+                ciphers_length,
+                session_length,
+                challenge_size,
+                cipher_hex,
+                challenge.to_vec(),
+            ].concat();
+            let message_size = (message.len() as u8).to_be_bytes().to_vec();
+            
+            message = [
+                (0x80 as u8).to_be_bytes().to_vec(),  // empirical observation from Wireshark on SSLv2.0 tests
+                message_size,
+                message,
+            ].concat();
+            hello_message = message;
+
+        } else {  // all other hellos
+            let message = [
+                CONTENT_HANDSHAKE.to_be_bytes().to_vec(),
+                HANDSHAKE_CLIENT_HELLO.to_be_bytes().to_vec(),
+                self.protocol.hex_value.clone(),
+                // (cipher.relevant_bytes as u16).to_be_bytes().to_vec(),
+                // session_length,
+                // cipher_hex,
+                // challenge.to_vec(),
+            ].concat();
+            hello_message = message;
+        }        
+        hello_message
     }
 }
 
 #[test]
 fn test_client_hello() {
+    let test_cipher = Cipher { name: "SSL2_RC4_128_WITH_MD5", hex_value: SSL2_RC4_128_WITH_MD5.to_be_bytes().to_vec(), relevant_bytes: 3 };
     let test_version = Version::new(
-        Protocol { name: "FooBar", hex_value: (0x0102 as u16).to_be_bytes().to_vec() },
-        vec![Cipher { name: "dummy", hex_value: (0x14e2f0 as u32).to_be_bytes().to_vec(), relevant_bytes: 3 }],
+        Protocol { name: "SSLv2.0", hex_value: SSLV20.to_be_bytes().to_vec() },
+        vec![test_cipher.clone()],
         None,
         None,
     );
-    let hello = test_version.client_hello(Cipher { name: "dummy", hex_value: (0x14e2f0 as u32).to_be_bytes().to_vec(), relevant_bytes: 3 });
+    let hello = test_version.client_hello(test_cipher);
     println!("{:?}", hello);
-    assert!(true)
+    todo!()
 }
 
 pub struct TestSuite {
     pub versions: Vec<Version>
 }
 impl TestSuite {
-    pub fn new() -> TestSuite {
+    pub fn new() -> Self {
         let ssl20 = Version::new(
             Protocol { name: "SSLv2.0", hex_value: SSLV20.to_be_bytes().to_vec() }, 
             vec![
@@ -265,7 +295,7 @@ impl TestSuite {
             Some(ext_ec_point_formats.clone()),
         );
     
-        TestSuite {
+        Self {
             versions: vec![ssl20, ssl30, tls10, tls11, tls12],
         }
     }

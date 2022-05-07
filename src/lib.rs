@@ -81,5 +81,5 @@ pub async fn check_supported_ciphers(addr: SocketAddr) -> Result<(), Box<dyn Err
     println!("Attempting tests on: {:?}", addr);
     let mut stream = net::TcpStream::connect(addr).await?;
     stream.write_all(b"foo").await?;
-    Ok(())
+    todo!()
 }
