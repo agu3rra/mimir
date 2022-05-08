@@ -1,3 +1,7 @@
+//! # protocol
+//! 
+//! this module contains all intricate function that implement a TLS handshake and handle the processing of a server response
+
 use rand::{Rng, RngCore};
 
 #[derive(Debug, Clone)]
@@ -42,7 +46,22 @@ impl Version {
         }
     }
 
-    // generates client hello byte stream for the given input cipher---
+    /// Generates client hello byte stream for the given input cipher and host
+    /// host is only part of SSLv3.0 and above hello's
+    /// 
+    /// # Example
+    /// ```
+    /// let test_cipher = Cipher { name: "SSL2_RC4_128_WITH_MD5", hex_value: SSL2_RC4_128_WITH_MD5.to_be_bytes().to_vec(), relevant_bytes: 3 };
+    /// let test_version = Version::new(
+    ///     Protocol { name: "SSLv2.0", hex_value: SSLV20.to_be_bytes().to_vec() },
+    ///     vec![test_cipher.clone()],
+    ///     None,
+    ///     None,
+    /// );
+    /// let hello = test_version.client_hello(test_cipher);
+    /// assert!(false);
+    /// todo!();
+    /// ```
     fn client_hello(&self, cipher: Cipher, host: String) -> Vec<u8> {
         let hello_message: Vec<u8>;
 
@@ -57,7 +76,7 @@ impl Version {
             let cipher_hex: Vec<u8> = cipher.hex_value[relevant_cipher_index_start..].to_vec();  // uses only required bytes
             let ciphers_length = (cipher.relevant_bytes as u16).to_be_bytes().to_vec();
 
-            let mut message = [
+            let mut message: Vec<u8> = [
                 HANDSHAKE_CLIENT_HELLO.to_be_bytes().to_vec(),
                 self.protocol.hex_value.clone(),
                 ciphers_length,
@@ -81,6 +100,8 @@ impl Version {
             let mut challenge = [0u8; 32];
             rng.fill(&mut challenge[..]); 
 
+            // message assembled backwards as there's size calculations in multiple locations
+
             // Extension Supported Versions
             let sup_version = self.protocol.hex_value.clone();
             let sup_version_length = (sup_version.len() as u8).to_be_bytes().to_vec();
@@ -98,17 +119,16 @@ impl Version {
             // STOPPED HERE
 
             
-            // message assembled backwards as there's size calculations in multiple locations
-            let mut message = [
+            let mut message: Vec<u8> = [
 
                 // Extension Supported Versions
                 
                 
                 
                 
-                // HANDSHAKE_CLIENT_HELLO.to_be_bytes().to_vec(),
+                HANDSHAKE_CLIENT_HELLO.to_be_bytes().to_vec(),
                 // // handshake_size in 3 bytes
-                // self.protocol.hex_value.clone(),  // it does repeat in multiple places; this one is handshake version
+                self.protocol.hex_value.clone(),  // it does repeat in multiple places; this one is handshake version
                 // challenge,
                 // (0x00 as u8).to_be_bytes().to_vec(),  // session_length; we don't use it
                 // ciphers size
@@ -133,20 +153,6 @@ impl Version {
         }        
         hello_message
     }
-}
-
-#[test]
-fn test_client_hello() {
-    let test_cipher = Cipher { name: "SSL2_RC4_128_WITH_MD5", hex_value: SSL2_RC4_128_WITH_MD5.to_be_bytes().to_vec(), relevant_bytes: 3 };
-    let test_version = Version::new(
-        Protocol { name: "SSLv2.0", hex_value: SSLV20.to_be_bytes().to_vec() },
-        vec![test_cipher.clone()],
-        None,
-        None,
-    );
-    let hello = test_version.client_hello(test_cipher);
-    println!("{:?}", hello);
-    todo!()
 }
 
 pub struct TestSuite {
