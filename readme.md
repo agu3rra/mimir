@@ -11,7 +11,7 @@ The objective of this CLI application is to tell you supported cipher-suites of 
 # Usage
 ```bash
 $ mimir --version
-$ mimir --test --host=example.com --port=8443
+$ mimir --test example.com:8443
 $ mimir --show-ciphers
 ```
 
@@ -26,3 +26,4 @@ $ mimir --show-ciphers
 # References
 * https://ssl-config.mozilla.org/
 * https://github.com/nabla-c0d3/sslyze
+* [The Illustrated TLS 1.2 Connection](https://tls12.ulfheim.net/)

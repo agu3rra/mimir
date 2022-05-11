@@ -47,7 +47,7 @@ impl Version {
     }
 
     /// Generates client hello byte stream for the given input cipher and host
-    /// host is only part of SSLv3.0 and above hello's
+    /// host is only required as of SSLv3.0.
     /// 
     /// # Example
     /// ```
@@ -102,12 +102,12 @@ impl Version {
 
             // message assembled backwards as there's size calculations in multiple locations
 
-            // Extension Supported Versions
+            // Extension: Supported Versions
             let sup_version = self.protocol.hex_value.clone();
             let sup_version_length = (sup_version.len() as u8).to_be_bytes().to_vec();
             let ext_length = ([
-                sup_version_length,
-                sup_version,
+                sup_version_length.clone(),
+                sup_version.clone(),
             ].concat().len() as u16).to_be_bytes().to_vec();
             let ext_type = (0x002b as u16).to_be_bytes().to_vec();
             let ext_sup_versions = [
@@ -116,7 +116,19 @@ impl Version {
                 sup_version_length,
                 sup_version,
             ].concat();
-            // STOPPED HERE
+            
+            // Resume HERE.
+            // Extension: Supported Groups
+            // match &self.ext_support_groups {
+            //     None => (),
+            //     Some(support_groups) => {
+            //         let mut groups: &Vec<u8>;
+            //         for group in support_groups {
+            //             groups.append(&group.hex_value);
+            //         }
+            //         let groups_length = 
+            //     }
+            // }
 
             
             let mut message: Vec<u8> = [
